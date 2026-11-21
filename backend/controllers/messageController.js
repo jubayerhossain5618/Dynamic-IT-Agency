@@ -2,6 +2,9 @@ const Message = require('../models/Message');
 const Project = require('../models/Project');
 const ServiceRequest = require('../models/ServiceRequest');
 const User = require('../models/User');
+const { getIO } = require('../utils/socket');
+const { createNotification } = require('../services/notificationService');
+const { sendNewMessageEmail } = require('../services/emailService');
 
 // @desc    Send a message related to a project or request
 // @route   POST /api/messages
@@ -103,9 +106,46 @@ const sendMessage = async (req, res, next) => {
 
     const populated = await Message.findById(newMessage._id)
       .populate('sender', 'name email role')
-      .populate('receiver', 'name email role')
+      .populate('receiver', 'name email role notificationPreferences')
       .populate('project', 'projectTitle status progress')
       .populate('request', 'projectTitle status');
+
+    const io = getIO();
+    if (io) {
+      const emitChain = io
+        .to(`user:${targetReceiverId.toString()}`)
+        .to(`user:${req.user._id.toString()}`);
+      if (foundProject) {
+        emitChain.to(`project:${foundProject._id.toString()}`);
+      }
+      emitChain.emit('chat:new_message', populated);
+    }
+
+    const contextTitle =
+      populated.project?.projectTitle ||
+      populated.request?.projectTitle ||
+      'Project Workspace';
+
+    await createNotification({
+      recipient: targetReceiverId,
+      type: 'new_message',
+      title: `New Message: ${contextTitle}`,
+      message: `${req.user.name}: ${message.trim().slice(0, 120)}`,
+      link:
+        req.user.role === 'admin'
+          ? `/customer/messages${foundProject ? `?projectId=${foundProject._id}` : ''}`
+          : `/admin/messages${foundProject ? `?projectId=${foundProject._id}` : ''}`,
+      relatedId: foundProject ? foundProject._id : newMessage._id,
+    });
+
+    if (populated.receiver) {
+      await sendNewMessageEmail(
+        populated.receiver,
+        req.user.name,
+        contextTitle,
+        message.trim().slice(0, 200)
+      );
+    }
 
     res.status(201).json({
       success: true,

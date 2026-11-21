@@ -176,7 +176,7 @@ const SIX_CORE_SERVICES = [
     pricingType: 'monthly',
     estimatedTimeline: '30 - 90 Days Growth Plan',
     image:
-      'https://images.unsplash.com/photo-1571721795195-a2ca2d3370a9?auto=format&fit=crop&w=1000&q=80',
+      'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=1000&q=80',
     iconName: 'Search',
     isActive: true,
     isFeatured: true,

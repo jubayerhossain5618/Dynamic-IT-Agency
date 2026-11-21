@@ -47,7 +47,7 @@ const getCustomerDashboard = async (req, res, next) => {
 
     const totalProjectValue = projects.reduce((sum, p) => sum + Number(p.totalAmount || 0), 0);
     const totalPaid = payments
-      .filter((pay) => pay.status !== 'refunded')
+      .filter((pay) => ['partial', 'paid'].includes(pay.status))
       .reduce((sum, pay) => sum + Number(pay.paidAmount || 0), 0);
     const remainingBalance = Math.max(0, totalProjectValue - totalPaid);
 
@@ -143,7 +143,7 @@ const getAdminDashboard = async (_req, res, next) => {
       Project.find()
         .populate('customer', 'name email company')
         .sort({ updatedAt: -1 }),
-      Payment.find({ status: { $ne: 'refunded' } })
+      Payment.find({ status: { $in: ['partial', 'paid'] } })
         .populate('customer', 'name email')
         .populate('project', 'projectTitle')
         .sort({ paymentDate: -1 }),

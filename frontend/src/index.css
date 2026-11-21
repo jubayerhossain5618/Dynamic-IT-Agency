@@ -4,7 +4,15 @@
 
 @layer base {
   body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #20242c;
+    background-color: #f8f7f4;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.022em;
   }
 }
 
@@ -15,7 +23,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f1f0ec;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -25,4 +33,122 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Subtle Agency Grid & Dot Textures */
+.bg-architectural-grid {
+  background-size: 44px 44px;
+  background-image:
+    linear-gradient(to right, rgba(16, 24, 40, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 24, 40, 0.05) 1px, transparent 1px);
+}
+
+.bg-architectural-grid-dark {
+  background-size: 44px 44px;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+.bg-dot-matrix {
+  background-image: radial-gradient(rgba(16, 24, 40, 0.09) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Keyframe Animations */
+@keyframes pulseFlow {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes revealUp {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-pulse-flow {
+  animation: pulseFlow 3.5s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: floatSlow 4.5s ease-in-out infinite;
+}
+
+.animate-reveal-up {
+  animation: revealUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-75 {
+  animation-delay: 75ms;
+}
+.delay-150 {
+  animation-delay: 150ms;
+}
+.delay-225 {
+  animation-delay: 225ms;
+}
+
+/* Tactile Card Hover Elevation */
+.studio-card {
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease;
+}
+
+.studio-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 16px 32px -12px rgba(16, 24, 40, 0.08),
+    0 0 0 1px rgba(37, 99, 235, 0.18);
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .studio-card:hover {
+    transform: none !important;
+  }
 }

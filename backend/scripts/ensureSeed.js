@@ -34,6 +34,9 @@ const ensureInitialData = async (forceReset = false) => {
     });
     console.log(`[Seed] Inserted ${createdServices.length} digital agency services.`);
   } else {
+    for (const item of SIX_CORE_SERVICES) {
+      await Service.updateOne({ slug: item.slug }, { $set: { image: item.image } });
+    }
     const allServices = await Service.find();
     allServices.forEach((s) => {
       servicesMap[s.slug] = s;
@@ -41,21 +44,32 @@ const ensureInitialData = async (forceReset = false) => {
   }
 
   // 2. Ensure default Admin account exists
-  let admin = await User.findOne({ email: 'admin@dynamicit.com' });
+  const adminEmail = (process.env.ADMIN_EMAIL || 'admin@dynamicit.com').toLowerCase().trim();
+  const adminPassword = process.env.ADMIN_INITIAL_PASSWORD || 'Password123';
+
+  let admin = await User.findOne({ role: 'admin' });
   if (!admin) {
     admin = await User.create({
-      name: 'Dynamic IT Administrator',
-      email: 'admin@dynamicit.com',
-      phone: '+880 1711-000111',
+      name: process.env.ADMIN_NAME || 'Dynamic IT Administrator',
+      email: adminEmail,
+      phone: process.env.ADMIN_PHONE || '+880 1711-000111',
       company: 'Dynamic IT Agency HQ',
-      password: 'Password123',
+      password: adminPassword,
       role: 'admin',
       isActive: true,
     });
-    console.log('[Seed] Created default admin account: admin@dynamicit.com / Password123');
+    console.log(`[Seed] Created initial administrator account: ${adminEmail}`);
   }
 
-  // 3. Ensure sample customers exist for rich demonstration
+  // 3. Only seed demo customers & sample projects in development or when SEED_DEMO_DATA=true
+  const shouldSeedDemo =
+    process.env.SEED_DEMO_DATA === 'true' ||
+    (process.env.NODE_ENV !== 'production' && process.env.SEED_DEMO_DATA !== 'false');
+
+  if (!shouldSeedDemo) {
+    return;
+  }
+
   let customer1 = await User.findOne({ email: 'rahim@technova.bd' });
   if (!customer1) {
     customer1 = await User.create({
@@ -67,7 +81,6 @@ const ensureInitialData = async (forceReset = false) => {
       role: 'customer',
       isActive: true,
     });
-    console.log('[Seed] Created sample customer: rahim@technova.bd / Password123');
   }
 
   let customer2 = await User.findOne({ email: 'nusrat@greenleaf.com.bd' });
@@ -90,7 +103,6 @@ const ensureInitialData = async (forceReset = false) => {
     const metaService = servicesMap['meta-ads-and-digital-marketing'];
     const seoService = servicesMap['seo-services'];
 
-    // Request 1: Accepted & Active Project with partial payment
     const req1 = await ServiceRequest.create({
       customer: customer1._id,
       service: webService._id,
@@ -189,7 +201,6 @@ const ensureInitialData = async (forceReset = false) => {
       },
     ]);
 
-    // Request 2: Pending Quotation waiting for Customer 1's response
     if (seoService) {
       const req2 = await ServiceRequest.create({
         customer: customer1._id,
@@ -219,7 +230,6 @@ const ensureInitialData = async (forceReset = false) => {
       });
     }
 
-    // Request 3: Newly submitted pending request from Customer 2
     if (metaService) {
       await ServiceRequest.create({
         customer: customer2._id,

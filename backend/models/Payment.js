@@ -34,6 +34,22 @@ const paymentSchema = new mongoose.Schema(
       enum: ['bKash', 'Nagad', 'Bank Transfer', 'Cash', 'Card / Other'],
       default: 'Bank Transfer',
     },
+    gateway: {
+      type: String,
+      enum: ['manual', 'bkash', 'nagad'],
+      default: 'manual',
+    },
+    gatewayPaymentId: {
+      type: String,
+      trim: true,
+      default: '',
+      index: true,
+    },
+    gatewayStatus: {
+      type: String,
+      enum: ['none', 'initiated', 'verified', 'failed', 'cancelled'],
+      default: 'none',
+    },
     paymentDate: {
       type: Date,
       default: Date.now,
@@ -42,10 +58,11 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: '',
+      index: true,
     },
     status: {
       type: String,
-      enum: ['pending', 'partial', 'paid', 'refunded'],
+      enum: ['pending', 'partial', 'paid', 'failed', 'cancelled', 'refunded'],
       default: 'partial',
       index: true,
     },

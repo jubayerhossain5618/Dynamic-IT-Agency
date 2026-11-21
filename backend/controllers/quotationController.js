@@ -1,6 +1,13 @@
 const Quotation = require('../models/Quotation');
 const ServiceRequest = require('../models/ServiceRequest');
 const Project = require('../models/Project');
+const User = require('../models/User');
+const { createNotification, notifyAdmins } = require('../services/notificationService');
+const {
+  sendNewQuotationEmail,
+  sendQuotationResponseEmail,
+} = require('../services/emailService');
+const { sendSmsNotification } = require('../services/smsService');
 
 const syncExpiredQuotations = async (quotations) => {
   const now = new Date();
@@ -81,8 +88,30 @@ const createQuotation = async (req, res, next) => {
         select: 'projectTitle description budget preferredDeadline status service',
         populate: { path: 'service', select: 'title slug category' },
       })
-      .populate('customer', 'name email phone company')
+      .populate('customer', 'name email phone company notificationPreferences')
       .populate('createdBy', 'name email');
+
+    await createNotification({
+      recipient: serviceRequest.customer,
+      type: 'new_quotation',
+      title: `New Custom Quotation: ${serviceRequest.projectTitle}`,
+      message: `Dynamic IT sent a quotation of ৳${Number(quotation.amount).toLocaleString()} (${quotation.estimatedDays} days delivery).`,
+      link: '/customer/quotations',
+      relatedId: quotation._id,
+    });
+
+    if (populated.customer) {
+      await sendNewQuotationEmail(
+        populated.customer,
+        quotation,
+        serviceRequest.projectTitle
+      );
+      await sendSmsNotification({
+        user: populated.customer,
+        message: `Dynamic IT: New quotation (BDT ${Number(quotation.amount).toLocaleString()}) ready for "${serviceRequest.projectTitle}".`,
+        eventType: 'new_quotation',
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -307,6 +336,23 @@ const respondToQuotation = async (req, res, next) => {
       .populate('customer', 'name email phone company')
       .populate('createdBy', 'name email');
 
+    const projTitle = populated.request?.projectTitle || 'Custom Service Request';
+
+    await notifyAdmins({
+      type: 'quotation_response',
+      title: `Quotation ${nextStatus.toUpperCase()}: ${projTitle}`,
+      message: `${req.user.name} ${nextStatus} quotation #${quotation._id.toString().slice(-6).toUpperCase()} (৳${Number(quotation.amount).toLocaleString()}).`,
+      link: '/admin/quotations',
+      relatedId: quotation._id,
+    });
+
+    await sendQuotationResponseEmail(
+      populated.createdBy?.email || 'admin@dynamicit.com',
+      req.user,
+      quotation,
+      projTitle
+    );
+
     res.status(200).json({
       success: true,
       message:
@@ -320,10 +366,95 @@ const respondToQuotation = async (req, res, next) => {
   }
 };
 
+// @desc    Edit a pending quotation (Admin)
+// @route   PUT /api/quotations/:id
+// @access  Private/Admin
+const updateQuotation = async (req, res, next) => {
+  try {
+    const quotation = await Quotation.findById(req.params.id);
+    if (!quotation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Quotation not found.',
+      });
+    }
+
+    const existingProject = await Project.findOne({ quotation: quotation._id });
+    if (existingProject || quotation.status === 'accepted') {
+      return res.status(400).json({
+        success: false,
+        message: 'An accepted quotation or one linked to an active project cannot be modified.',
+      });
+    }
+
+    const { amount, estimatedDays, scope, terms, validUntil, status } = req.body;
+
+    if (amount !== undefined) {
+      const numericAmount = Number(amount);
+      if (Number.isNaN(numericAmount) || numericAmount <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Quotation amount must be greater than zero.',
+        });
+      }
+      quotation.amount = numericAmount;
+    }
+
+    if (estimatedDays !== undefined) {
+      const numericDays = Number(estimatedDays);
+      if (Number.isNaN(numericDays) || numericDays < 1) {
+        return res.status(400).json({
+          success: false,
+          message: 'Estimated delivery days must be at least 1.',
+        });
+      }
+      quotation.estimatedDays = numericDays;
+    }
+
+    if (scope !== undefined) quotation.scope = scope.trim();
+    if (terms !== undefined) quotation.terms = terms.trim();
+    if (validUntil) quotation.validUntil = new Date(validUntil);
+    if (status && ['pending', 'expired'].includes(status)) {
+      quotation.status = status;
+    }
+
+    await quotation.save();
+
+    const populated = await Quotation.findById(quotation._id)
+      .populate({
+        path: 'request',
+        select: 'projectTitle description budget preferredDeadline status service',
+        populate: { path: 'service', select: 'title slug category' },
+      })
+      .populate('customer', 'name email phone company')
+      .populate('createdBy', 'name email');
+
+    const projTitle = populated.request?.projectTitle || 'Custom Service Request';
+
+    await createNotification({
+      recipient: quotation.customer,
+      type: 'new_quotation',
+      title: `Updated Quotation: ${projTitle}`,
+      message: `Dynamic IT updated your quotation to ৳${Number(quotation.amount).toLocaleString()} (${quotation.estimatedDays} days).`,
+      link: '/customer/quotations',
+      relatedId: quotation._id,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Quotation updated successfully.',
+      quotation: populated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createQuotation,
   getAllQuotations,
   getMyQuotations,
   getQuotationById,
   respondToQuotation,
+  updateQuotation,
 };

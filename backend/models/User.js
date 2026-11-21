@@ -43,6 +43,44 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: {
+      type: String,
+      select: false,
+      default: null,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      select: false,
+      default: null,
+    },
+    passwordResetToken: {
+      type: String,
+      select: false,
+      default: null,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
+      default: null,
+    },
+    notificationPreferences: {
+      email: {
+        type: Boolean,
+        default: true,
+      },
+      sms: {
+        type: Boolean,
+        default: false,
+      },
+      smsConsentAt: {
+        type: Date,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,

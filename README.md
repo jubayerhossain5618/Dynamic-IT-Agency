@@ -1,15 +1,15 @@
 # Dynamic IT — Full-Stack Digital Agency Service Management and Project Tracking Platform
 
-**Dynamic IT** is a full-stack, database-driven digital agency web application and client project tracking platform developed with **React.js (Vite)**, **Tailwind CSS**, **Node.js**, **Express.js**, and **MongoDB (Mongoose)**.
+**Dynamic IT** is a full-stack, database-driven digital agency web application and client project tracking platform built with **React.js (Vite)**, **Tailwind CSS**, **Node.js**, **Express.js**, and **MongoDB (Mongoose)**.
 
-It enables customers to explore agency services, submit project requirements with file attachments, receive and accept custom quotations, track live project milestones and completion percentages, view payment balances, and exchange project messages with the agency administrator.
+It enables customers to explore agency services, submit project requirements with validated reference documents, receive and accept custom quotations, track live project milestones and completion percentages (`0%` → `100%`) with an audit trail, view payment balances, and exchange project messages with the agency administrator.
 
 ---
 
-## 1. Key Features
+## 1. Core Features & Modules
 
-### Public Website Module
-- **Home Page**: Hero section, live workflow preview, database-driven Services Overview, Why Choose Dynamic IT, How It Works (4-step lifecycle), Featured Portfolio, Client Testimonials, and Contact CTA.
+### Public Agency Website
+- **Home Page**: Navigation bar, Hero section with live portal preview, database-driven Services Overview, Why Choose Dynamic IT, interactive 4-step How We Work section, Featured Sample Portfolio, clearly identified Sample Client Feedback, interactive **FAQ accordion**, and Contact CTA.
 - **Six Core Digital Services (Stored in MongoDB)**:
   1. Meta Ads and Digital Marketing
   2. Website Development
@@ -17,90 +17,88 @@ It enables customers to explore agency services, submit project requirements wit
   4. Domain and Hosting Assistance
   5. Graphic Design and Branding
   6. SEO Services
-- **Service Details, Pricing, Portfolio & Contact Pages**: Dynamic service details with "Request a Quote" integration, sample package pricing table, filterable portfolio case studies, and MongoDB-backed contact form.
+- **About, Service Details, Pricing, Portfolio & Contact Pages**:
+  - Dynamic service details with technical deliverables and "Request a Custom Quote" flow.
+  - Curated service packages and live MongoDB rate ledger.
+  - Sample portfolio showcase with an interactive **Project Details Modal**.
+  - Contact form saving inquiries directly to MongoDB.
 
-### Customer Portal Module
-- **Customer Dashboard**: Real-time statistics from MongoDB (Total Requests, Pending Quotations, Active Projects, Completed Projects, Payment Summary, and Recent Activities).
-- **Service Request Submission**: Submit project title, description, requirements, budget (`৳`), preferred deadline, and reference attachments (`PDF`, `JPG`, `PNG`, `DOCX`).
-- **Quotation Management**: Review proposed amount, estimated delivery days, project scope, and terms; accept or reject quotations with one click.
-- **Project Progress Tracking**: Live progress bar (`0%` → `40%` → `65%` → `100%`), milestone status checklist, expected delivery date, and payment summary.
-- **Payments & Project Messaging**: View recorded payment installments, remaining balance, and chat directly with the administrator per project.
+### Customer Portal
+- **Customer Dashboard**: Real-time statistics from MongoDB (Total Requests, Pending Quotations, Active Projects, Completed Projects, Financial Ledger, and Event Log).
+- **Service Request Submission**: Select a service, enter project title and requirements, set an optional estimated budget (`৳`) and preferred deadline, and attach reference files (`PDF`, `JPG`, `PNG`, `DOCX` up to 8MB).
+- **Quotation Management**: View proposed amount, delivery timeline, scope, terms, and validity date; accept or decline pending quotations.
+- **Project Progress & Audit History**: View live completion percentage (`0%` to `100%`), milestone checklists, expected delivery date, payment summary, and a chronological **Project Activity & Audit History** log.
+- **Payment Ledger & Project Messages**: Inspect recorded payment installments, remaining balance, and communicate directly with the administrator per project.
 
-### Admin Control Center Module
-- **Admin Analytics Dashboard**: Real MongoDB KPIs and **Recharts** visualizations (Service Demand Bar Chart & Project Status Pie Chart).
-- **Request & Quotation Management**: Review customer requests, add internal notes, and send custom quotations.
-- **Project & Milestone Management**: Initialize projects from accepted quotations (with duplicate prevention), update progress percentages (`25%`, `40%`, `65%`, `85%`, `100%` or custom), and manage milestones.
-- **Manual Payment Ledger**: Record client payments (`bKash`, `Nagad`, `Bank Transfer`, `Cash`, `Card`) with automatic remaining balance calculation.
-- **Customer, Service & Inquiry Management**: Manage the MongoDB service catalogue, view/deactivate customer accounts, reply to project messages, and review public contact inquiries.
-
----
-
-## 2. Technology Stack
-
-| Layer | Technologies |
-| :--- | :--- |
-| **Frontend** | React 18, Vite, JavaScript (ES6+), Tailwind CSS, React Router DOM v6, Axios, Lucide React Icons, Recharts |
-| **Backend** | Node.js, Express.js, REST API |
-| **Database** | MongoDB, Mongoose ODM (8 Collections with ObjectId references & indexes) |
-| **Security & Auth** | JWT (`jsonwebtoken`), HTTP-only Cookies (`cookie-parser`), `bcryptjs` Password Hashing, Role-Based Access Control (`customer` / `admin`) |
-| **File Uploads** | `Multer` (Server-side PDF/JPG/PNG/DOCX validation) + Optional `Cloudinary` integration |
+### Admin Control Center
+- **Admin Overview Dashboard**: Real MongoDB KPIs and **Recharts** visualizations (Service Demand Bar Chart & Project Status Pie Chart).
+- **Service & Customer Management**: Add, edit, feature, or deactivate services; search customers, inspect their requests/projects, and activate/deactivate accounts.
+- **Request & Quotation Desk**: Review customer requests, view protected attachments, update review notes, create custom quotations, and edit pending quotations (`PUT /api/quotations/:id`).
+- **Project Operations & Payment Ledger**: Initialize projects from accepted quotations (with duplicate prevention), update progress percentages and milestones, record manual payments (with overpayment protection), and reply to project messages and public contact inquiries.
 
 ---
 
-## 3. Demo Credentials (Pre-Seeded)
+## 2. Security & Data Integrity Architecture
 
-| Role | Email | Password |
-| :--- | :--- | :--- |
-| **Administrator** | `admin@dynamicit.com` | `Password123` |
-| **Demo Customer 1** | `rahim@technova.bd` | `Password123` |
-| **Demo Customer 2** | `nusrat@greenleaf.com.bd` | `Password123` |
-
-*(You can also click the **"Demo Customer"** or **"Demo Admin"** quick-fill buttons on the `/login` page during your presentation.)*
+1. **Strict JWT & Cookie Authentication**:
+   - No hardcoded JWT secret fallbacks (`JWT_SECRET` is required in `.env`).
+   - Authentication uses `httpOnly` cookies (`SameSite` and `Secure` aware) and does not expose raw JWT tokens in browser JSON responses.
+2. **Explicit CORS Allowlist**:
+   - Only origins configured in `CLIENT_URL` (plus local Vite dev ports in development) are permitted. Arbitrary origins are rejected with `403`.
+3. **Security Headers, NoSQL Sanitization & Rate Limiting**:
+   - Sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, and `Strict-Transport-Security` (in production).
+   - Recursively strips `$` and `.` operator keys from `req.body`, `req.query`, and `req.params`.
+   - Enforces IP rate limiting on `/api/auth/login`, `/api/auth/register`, `/api/contact`, and `/api/*`.
+4. **Magic-Byte File Upload Verification & Protected Access**:
+   - Validates extension, MIME type, AND the actual binary file header magic bytes (`%PDF`, JPEG `FF D8 FF`, PNG `89 50 4E 47`, DOCX `50 4B 03 04`).
+   - Uploaded customer documents are served through an authenticated, ownership-verified endpoint (`/api/uploads/:filename`) rather than an unrestricted public static directory.
+5. **Business Rules Enforced on Backend**:
+   - Duplicate project creation from the same quotation is blocked by both controller validation and a unique MongoDB index.
+   - Total recorded payments cannot exceed the agreed project amount unless `allowAdjustment: true` is explicitly specified.
+   - Project status (`completed`) and completion percentage (`100%`) are kept bidirectionally consistent, and every update appends an entry to `project.history`.
 
 ---
 
-## 4. Quick Start & Running Locally
+## 3. Local Setup & Running Instructions
 
 ### Prerequisites
-- **Node.js** (v18+ or v20/v24)
-- **MongoDB** (Local MongoDB Server or MongoDB Atlas). *Note: If local MongoDB is installed at `C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe`, the backend will automatically start a local MongoDB instance if port `27017` is not yet running.*
+- **Node.js** v18+ (tested on v24.12.0)
+- **MongoDB** (Local MongoDB Server on port `27017` or MongoDB Atlas)
 
-### Step 1: Install Dependencies
-```bash
-npm --prefix backend install
-npm --prefix frontend install
+### 1. Install Dependencies
+```powershell
+npm.cmd --prefix backend install
+npm.cmd --prefix frontend install
 ```
 
-### Step 2: Seed Sample Data (Optional — Backend Auto-Seeds on First Start)
-```bash
-npm --prefix backend run seed
+### 2. Configure Environment Variables
+Copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env`.
+Ensure `JWT_SECRET` and `MONGODB_URI` are set in `backend/.env`.
+
+### 3. Start Backend Server (Port 5000)
+```powershell
+cd backend
+npm.cmd run dev
 ```
 
-### Step 3: Start the Backend API Server (Port 5000)
-```bash
-npm --prefix backend run dev
+### 4. Start Frontend Dev Server (Port 5173)
+Open a second terminal:
+```powershell
+cd frontend
+npm.cmd run dev
 ```
+Open **`http://localhost:5173`** in your browser.
 
-### Step 4: Start the Frontend Vite Server (Port 5173)
-Open a second terminal and run:
-```bash
-npm --prefix frontend run dev
-```
-Then open **`http://localhost:5173`** in your browser.
-
-### Step 5: Run Automated 16-Step Workflow Verification
-To verify the entire 16-step live demonstration workflow end-to-end against MongoDB:
-```bash
-npm --prefix backend run test:workflow
+### 5. Run the 20-Step Automated E2E & Security Verification Suite
+```powershell
+npm.cmd --prefix backend run test:workflow
 ```
 
 ---
 
-## 5. Architecture & Viva Documentation
+## 4. Known Limitations
 
-Detailed technical documentation for project evaluation and viva presentation is located in the `documentation/` directory:
-- [Database Design & ER Diagram](documentation/database-design.md)
-- [REST API Documentation](documentation/api-documentation.md)
-- [System Architecture & Security Controls](documentation/system-architecture.md)
-- [16-Step Live Demo Script & Viva Q&A](documentation/workflow.md)
-- [Project Progress Log](PROJECT_PROGRESS.md)
+1. **Manual Payment Recording**: As designed, payments (`bKash`, `Nagad`, `Bank Transfer`, `Cash`) are recorded and verified manually by the administrator rather than through an automated third-party payment gateway.
+2. **Polling / Refresh Messaging**: Project messages use standard REST API fetches (`GET /api/messages/:projectId`) rather than persistent WebSockets.
+3. **In-Memory Rate Limiter**: The IP rate limiter uses an in-memory `Map` suitable for single-instance deployments; multi-instance horizontal scaling would require a shared Redis store.
+4. **Cloud File Persistence**: In production (`NODE_ENV=production`), `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` must be configured in `backend/.env` for file uploads unless `ALLOW_LOCAL_UPLOADS_IN_PROD=true` is set on a persistent disk volume.

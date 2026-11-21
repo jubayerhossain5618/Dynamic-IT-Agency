@@ -48,12 +48,12 @@ const serviceRequestSchema = new mongoose.Schema(
     },
     budget: {
       type: Number,
-      required: [true, 'Estimated budget is required'],
+      default: 0,
       min: [0, 'Budget cannot be negative'],
     },
     preferredDeadline: {
       type: Date,
-      required: [true, 'Preferred deadline is required'],
+      default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
     },
     attachments: {
       type: [attachmentSchema],

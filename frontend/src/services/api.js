@@ -7,10 +7,10 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Attach Bearer token from sessionStorage/localStorage if present for multi-session support
+// Primary auth uses HTTP-only cookies. Optional sessionStorage fallback supports cross-origin ITP browsers without persisting tokens in localStorage.
 api.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem('dyit_token') || localStorage.getItem('dyit_token');
+    const token = sessionStorage.getItem('dyit_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -22,7 +22,6 @@ api.interceptors.request.use(
 export const setStoredAuthToken = (token) => {
   if (token) {
     sessionStorage.setItem('dyit_token', token);
-    localStorage.setItem('dyit_token', token);
   } else {
     sessionStorage.removeItem('dyit_token');
     localStorage.removeItem('dyit_token');

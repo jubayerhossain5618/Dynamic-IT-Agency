@@ -124,14 +124,16 @@ const NewRequestPage = () => {
       title="Submit a Service Request"
       subtitle="Tell Dynamic IT about your project goals, requirements, budget, and preferred timeline"
       actions={
-        <button
-          type="button"
-          onClick={fillDemoRequest}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Auto-Fill Demo Website Request</span>
-        </button>
+        import.meta.env.VITE_DEMO_MODE === 'true' ? (
+          <button
+            type="button"
+            onClick={fillDemoRequest}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Auto-Fill Demo Website Request</span>
+          </button>
+        ) : null
       }
     >
       <div className="max-w-3xl bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
@@ -219,28 +221,26 @@ const NewRequestPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Estimated Budget (BDT ৳) *
+                Estimated Budget (BDT ৳ — Optional)
               </label>
               <input
                 type="number"
                 name="budget"
-                min="500"
-                required
+                min="0"
                 value={formData.budget}
                 onChange={handleChange}
-                placeholder="e.g., 15000"
+                placeholder="e.g., 15000 (Leave blank for agency estimate)"
                 className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Preferred Completion Deadline *
+                Preferred Completion Deadline
               </label>
               <input
                 type="date"
                 name="preferredDeadline"
-                required
                 value={formData.preferredDeadline}
                 onChange={handleChange}
                 className="w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500"

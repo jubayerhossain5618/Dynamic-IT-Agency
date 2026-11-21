@@ -212,6 +212,36 @@ const MyProjectsPage = () => {
                     </div>
                   )}
 
+                  {/* Project Audit History */}
+                  {project.history && project.history.length > 0 && (
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+                        Project Activity & Audit History
+                      </h4>
+                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                        {project.history
+                          .slice()
+                          .reverse()
+                          .map((entry, idx) => (
+                            <div
+                              key={idx}
+                              className="flex flex-wrap items-center justify-between gap-2 text-xs py-1.5 border-b border-slate-200/60 last:border-b-0"
+                            >
+                              <div>
+                                <span className="font-semibold text-slate-900">
+                                  {entry.action}:
+                                </span>{' '}
+                                <span className="text-slate-600">{entry.note}</span>
+                              </div>
+                              <span className="text-[11px] text-slate-400">
+                                {formatDate(entry.timestamp)}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Footer Actions */}
                   <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                     <span className="text-xs text-slate-400">

@@ -3,6 +3,8 @@ const Service = require('../models/Service');
 const Quotation = require('../models/Quotation');
 const Project = require('../models/Project');
 const { processUploadedFiles } = require('../middleware/uploadMiddleware');
+const { notifyAdmins } = require('../services/notificationService');
+const { sendNewRequestEmail } = require('../services/emailService');
 
 // @desc    Create a new customer service request
 // @route   POST /api/requests
@@ -21,10 +23,10 @@ const createServiceRequest = async (req, res, next) => {
 
     const targetServiceId = service || serviceId;
 
-    if (!targetServiceId || !projectTitle || !description || budget === undefined || !preferredDeadline) {
+    if (!targetServiceId || !projectTitle || !description) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide service, project title, description, budget, and preferred deadline.',
+        message: 'Please provide a service, project title, and project description.',
       });
     }
 
@@ -36,6 +38,20 @@ const createServiceRequest = async (req, res, next) => {
       });
     }
 
+    const parsedBudget =
+      budget !== undefined && budget !== '' ? Number(budget) : foundService.startingPrice || 0;
+
+    if (Number.isNaN(parsedBudget) || parsedBudget < 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Budget must be a valid non-negative number.',
+      });
+    }
+
+    const deadlineDate = preferredDeadline
+      ? new Date(preferredDeadline)
+      : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
     const attachments = await processUploadedFiles(req.files || []);
 
     // Security rule: Always assign customer from authenticated JWT user
@@ -45,8 +61,8 @@ const createServiceRequest = async (req, res, next) => {
       projectTitle: projectTitle.trim(),
       description: description.trim(),
       requirements: requirements ? requirements.trim() : '',
-      budget: Number(budget),
-      preferredDeadline: new Date(preferredDeadline),
+      budget: parsedBudget,
+      preferredDeadline: deadlineDate,
       attachments,
       status: 'pending',
     });
@@ -54,6 +70,16 @@ const createServiceRequest = async (req, res, next) => {
     const populated = await ServiceRequest.findById(serviceRequest._id)
       .populate('service', 'title slug category startingPrice')
       .populate('customer', 'name email phone company');
+
+    await notifyAdmins({
+      type: 'new_request',
+      title: `New Service Request: ${serviceRequest.projectTitle}`,
+      message: `${req.user.name} submitted a request for ${foundService.title}.`,
+      link: '/admin/requests',
+      relatedId: serviceRequest._id,
+    });
+
+    await sendNewRequestEmail(req.user, serviceRequest, foundService.title);
 
     res.status(201).json({
       success: true,

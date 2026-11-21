@@ -3,6 +3,12 @@ const Quotation = require('../models/Quotation');
 const ServiceRequest = require('../models/ServiceRequest');
 const Payment = require('../models/Payment');
 const Message = require('../models/Message');
+const { createNotification } = require('../services/notificationService');
+const {
+  sendProjectCreatedEmail,
+  sendProjectProgressEmail,
+} = require('../services/emailService');
+const { sendSmsNotification } = require('../services/smsService');
 
 const buildPaymentSummary = async (projectIds) => {
   const payments = await Payment.find({ project: { $in: projectIds } }).sort({ paymentDate: -1 });
@@ -18,7 +24,7 @@ const buildPaymentSummary = async (projectIds) => {
         payments: [],
       };
     }
-    if (p.status !== 'refunded') {
+    if (['partial', 'paid'].includes(p.status)) {
       summaryMap[pid].totalPaid += Number(p.paidAmount || 0);
     }
     summaryMap[pid].paymentCount += 1;
@@ -121,6 +127,19 @@ const createProject = async (req, res, next) => {
       progress: 0,
       status: 'in_progress',
       milestones: defaultMilestones,
+      history: [
+        {
+          action: 'Project Initialized',
+          status: 'in_progress',
+          progress: 0,
+          note: `Project workspace created from accepted quotation #${foundQuotation._id
+            .toString()
+            .slice(-6)
+            .toUpperCase()}`,
+          updatedBy: req.user._id,
+          timestamp: new Date(),
+        },
+      ],
     });
 
     await ServiceRequest.findByIdAndUpdate(foundQuotation.request._id, {
@@ -128,13 +147,31 @@ const createProject = async (req, res, next) => {
     });
 
     const populated = await Project.findById(project._id)
-      .populate('customer', 'name email phone company')
+      .populate('customer', 'name email phone company notificationPreferences')
       .populate('quotation', 'amount estimatedDays scope terms')
       .populate({
         path: 'request',
         select: 'projectTitle budget preferredDeadline service',
         populate: { path: 'service', select: 'title slug category' },
       });
+
+    await createNotification({
+      recipient: foundQuotation.customer,
+      type: 'new_project',
+      title: `Project Initialized: ${project.projectTitle}`,
+      message: 'Your accepted quotation is now an active project workspace. Track live progress in your dashboard.',
+      link: '/customer/projects',
+      relatedId: project._id,
+    });
+
+    if (populated.customer) {
+      await sendProjectCreatedEmail(populated.customer, project);
+      await sendSmsNotification({
+        user: populated.customer,
+        message: `Dynamic IT: Your project "${project.projectTitle}" has been initialized and is now in progress.`,
+        eventType: 'project_creation',
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -298,7 +335,7 @@ const getProjectById = async (req, res, next) => {
 
     const payments = await Payment.find({ project: project._id }).sort({ paymentDate: -1 });
     const totalPaid = payments
-      .filter((p) => p.status !== 'refunded')
+      .filter((p) => ['partial', 'paid'].includes(p.status))
       .reduce((acc, p) => acc + Number(p.paidAmount || 0), 0);
     const remainingAmount = Math.max(0, project.totalAmount - totalPaid);
     const paymentStatus =
@@ -360,6 +397,8 @@ const updateProjectProgress = async (req, res, next) => {
 
       if (numericProgress === 100 && !status) {
         project.status = 'completed';
+      } else if (numericProgress < 100 && project.status === 'completed' && !status) {
+        project.status = 'in_progress';
       } else if (numericProgress > 0 && project.status === 'not_started' && !status) {
         project.status = 'in_progress';
       }
@@ -367,22 +406,52 @@ const updateProjectProgress = async (req, res, next) => {
 
     if (status) {
       project.status = status;
+      if (status === 'completed') {
+        project.progress = 100;
+      }
     }
 
     if (Array.isArray(milestones)) {
       project.milestones = milestones;
     }
 
+    project.history.push({
+      action: 'Progress Updated',
+      status: project.status,
+      progress: project.progress,
+      note: req.body.note || `Completion progress updated to ${project.progress}%`,
+      updatedBy: req.user._id,
+      timestamp: new Date(),
+    });
+
     await project.save();
 
     const updated = await Project.findById(project._id)
-      .populate('customer', 'name email phone company')
+      .populate('customer', 'name email phone company notificationPreferences')
       .populate('quotation', 'amount estimatedDays scope')
       .populate({
         path: 'request',
         select: 'projectTitle service',
         populate: { path: 'service', select: 'title slug category' },
       });
+
+    await createNotification({
+      recipient: project.customer,
+      type: 'project_progress',
+      title: `Project Progress: ${project.progress}% — ${project.projectTitle}`,
+      message: `Your project "${project.projectTitle}" is now at ${project.progress}% completion (Status: ${project.status.replace('_', ' ')}).`,
+      link: '/customer/projects',
+      relatedId: project._id,
+    });
+
+    if (updated.customer) {
+      await sendProjectProgressEmail(updated.customer, project);
+      await sendSmsNotification({
+        user: updated.customer,
+        message: `Dynamic IT: Project "${project.projectTitle}" progress updated to ${project.progress}% (${project.status.replace('_', ' ')}).`,
+        eventType: 'project_progress_update',
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -421,11 +490,22 @@ const updateProjectStatus = async (req, res, next) => {
       project.progress = 100;
     } else if (progress !== undefined) {
       project.progress = Number(progress);
+    } else if (status === 'in_progress' && project.progress === 100) {
+      project.progress = 90;
     }
 
     if (expectedDeliveryDate) {
       project.expectedDeliveryDate = new Date(expectedDeliveryDate);
     }
+
+    project.history.push({
+      action: 'Status Updated',
+      status: project.status,
+      progress: project.progress,
+      note: `Project status changed to '${project.status.replace('_', ' ')}'`,
+      updatedBy: req.user._id,
+      timestamp: new Date(),
+    });
 
     await project.save();
 

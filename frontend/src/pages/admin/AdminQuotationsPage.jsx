@@ -23,6 +23,7 @@ const AdminQuotationsPage = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(Boolean(preselectedRequestId));
+  const [editingQuotationId, setEditingQuotationId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', message: '' });
 
@@ -92,23 +93,47 @@ const AdminQuotationsPage = () => {
     setShowForm(true);
   };
 
+  const handleEditQuotation = (q) => {
+    setEditingQuotationId(q._id);
+    setFormData({
+      requestId: q.request?._id || q.request || '',
+      amount: String(q.amount),
+      estimatedDays: String(q.estimatedDays),
+      scope: q.scope || '',
+      terms: q.terms || '',
+      validUntil: q.validUntil
+        ? new Date(q.validUntil).toISOString().split('T')[0]
+        : defaultExpiry,
+    });
+    setShowForm(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFeedback({ type: '', message: '' });
 
     try {
       setSubmitting(true);
-      const { data } = await api.post('/quotations', formData);
-      setFeedback({
-        type: 'success',
-        message: data.message || 'Quotation created and sent to customer.',
-      });
+      if (editingQuotationId) {
+        const { data } = await api.put(`/quotations/${editingQuotationId}`, formData);
+        setFeedback({
+          type: 'success',
+          message: data.message || 'Quotation updated successfully.',
+        });
+      } else {
+        const { data } = await api.post('/quotations', formData);
+        setFeedback({
+          type: 'success',
+          message: data.message || 'Quotation created and sent to customer.',
+        });
+      }
+      setEditingQuotationId(null);
       setShowForm(false);
       await loadData();
     } catch (err) {
       setFeedback({
         type: 'error',
-        message: err.response?.data?.message || 'Failed to create quotation.',
+        message: err.response?.data?.message || 'Failed to save quotation.',
       });
     } finally {
       setSubmitting(false);
@@ -144,14 +169,16 @@ const AdminQuotationsPage = () => {
       subtitle="Create custom quotations for client requests and convert accepted proposals into active projects"
       actions={
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={fillLiveDemoQuotation}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Demo ৳15,000 Quote</span>
-          </button>
+          {import.meta.env.VITE_DEMO_MODE === 'true' && (
+            <button
+              type="button"
+              onClick={fillLiveDemoQuotation}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Demo ৳15,000 Quote</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
@@ -372,26 +399,38 @@ const AdminQuotationsPage = () => {
                   {q.respondedAt && ` • Client responded ${formatDate(q.respondedAt)}`}
                 </span>
 
-                {q.status === 'accepted' && !q.project && (
-                  <button
-                    type="button"
-                    onClick={() => handleInitializeProject(q)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm"
-                  >
-                    <Briefcase className="w-4 h-4" />
-                    <span>Create Project from Accepted Quotation</span>
-                  </button>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  {q.status === 'pending' && !q.project && (
+                    <button
+                      type="button"
+                      onClick={() => handleEditQuotation(q)}
+                      className="px-3.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold text-slate-700"
+                    >
+                      Edit Quotation
+                    </button>
+                  )}
 
-                {q.project && (
-                  <Link
-                    to="/admin/projects"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 font-semibold"
-                  >
-                    <Briefcase className="w-3.5 h-3.5" />
-                    <span>Project Active ({q.project.progress}%) →</span>
-                  </Link>
-                )}
+                  {q.status === 'accepted' && !q.project && (
+                    <button
+                      type="button"
+                      onClick={() => handleInitializeProject(q)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-sm"
+                    >
+                      <Briefcase className="w-4 h-4" />
+                      <span>Create Project from Accepted Quotation</span>
+                    </button>
+                  )}
+
+                  {q.project && (
+                    <Link
+                      to="/admin/projects"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-purple-50 text-purple-700 border border-purple-200 font-semibold"
+                    >
+                      <Briefcase className="w-3.5 h-3.5" />
+                      <span>Project Active ({q.project.progress}%) →</span>
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           ))}

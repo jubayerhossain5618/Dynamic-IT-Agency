@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { getJwtSecret } = require('../utils/jwt');
 
 const protect = async (req, res, next) => {
   try {
@@ -21,10 +22,7 @@ const protect = async (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || 'dynamic_it_university_project_jwt_secret_key_2026_secure'
-    );
+    const decoded = jwt.verify(token, getJwtSecret());
 
     const user = await User.findById(decoded.id).select('-password');
     if (!user) {
@@ -43,7 +41,7 @@ const protect = async (req, res, next) => {
 
     req.user = user;
     next();
-  } catch (error) {
+  } catch (_error) {
     return res.status(401).json({
       success: false,
       message: 'Invalid or expired authentication session. Please log in again.',

@@ -9,7 +9,7 @@ import {
   CreditCard,
   Clock,
   RefreshCw,
-  ArrowRight,
+  ArrowUpRight,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -30,7 +30,7 @@ import ProgressBar from '../../components/common/ProgressBar';
 import api from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
-const PIE_COLORS = ['#4f46e5', '#10b981', '#64748b', '#f59e0b'];
+const PIE_COLORS = ['#2563eb', '#10b981', '#64748b', '#f59e0b'];
 
 const AdminDashboard = () => {
   const [data, setData] = useState(null);
@@ -70,50 +70,50 @@ const AdminDashboard = () => {
 
   return (
     <DashboardLayout
-      title="Agency Administration Overview"
-      subtitle="Real-time metrics across customers, service requests, quotations, active projects, and revenue"
+      title="Admin Command Overview"
+      subtitle="Real-time studio telemetry across clients, service briefs, quotations, active builds, and revenue"
       actions={
         <button
           type="button"
           onClick={fetchAdminStats}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-mono text-xs font-semibold text-slate-700"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh Analytics</span>
+          <span>Sync Telemetry</span>
         </button>
       }
     >
-      {/* Primary KPI Grid (7 Core Metrics from Section 6) */}
+      {/* Primary KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <Link
           to="/admin/customers"
-          className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-brand-300 transition-all shadow-sm"
+          className="studio-card bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Total Customers
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              01 // CLIENTS
             </span>
-            <div className="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
-              <Users className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-slate-950 text-white flex items-center justify-center">
+              <Users className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-slate-900">{stats.totalCustomers}</p>
-          <p className="text-xs text-slate-500 mt-1">Registered client accounts</p>
+          <p className="text-3xl font-extrabold font-mono text-slate-950">{stats.totalCustomers}</p>
+          <p className="text-xs text-slate-500 mt-1">Registered customer accounts</p>
         </Link>
 
         <Link
           to="/admin/requests"
-          className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-brand-300 transition-all shadow-sm"
+          className="studio-card bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Service Requests
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              02 // BRIEFS
             </span>
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <FolderKanban className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center">
+              <FolderKanban className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-slate-900">{stats.totalRequests}</p>
+          <p className="text-3xl font-extrabold font-mono text-slate-950">{stats.totalRequests}</p>
           <p className="text-xs text-amber-600 font-semibold mt-1">
             {stats.pendingRequests} Pending Review
           </p>
@@ -121,70 +121,72 @@ const AdminDashboard = () => {
 
         <Link
           to="/admin/quotations"
-          className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-brand-300 transition-all shadow-sm"
+          className="studio-card bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Pending Quotations
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              03 // QUOTATIONS
             </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <FileSpreadsheet className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center">
+              <FileSpreadsheet className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-slate-900">{stats.pendingQuotations}</p>
+          <p className="text-3xl font-extrabold font-mono text-slate-950">
+            {stats.pendingQuotations}
+          </p>
           <p className="text-xs text-emerald-600 font-semibold mt-1">
-            {stats.acceptedQuotations} Accepted Quotations
+            {stats.acceptedQuotations} Client Accepted
           </p>
         </Link>
 
         <Link
           to="/admin/projects"
-          className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-brand-300 transition-all shadow-sm"
+          className="studio-card bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Active Projects
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              04 // PROJECTS
             </span>
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <Briefcase className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+              <Briefcase className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-3xl font-extrabold text-slate-900">{stats.activeProjects}</p>
+          <p className="text-3xl font-extrabold font-mono text-slate-950">{stats.activeProjects}</p>
           <p className="text-xs text-emerald-600 font-semibold mt-1">
-            {stats.completedProjects} Completed Projects
+            {stats.completedProjects} Completed Deliveries
           </p>
         </Link>
       </div>
 
-      {/* Secondary Row: Revenue & Completed Projects Banner */}
+      {/* Revenue & Contract Volume Strip */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
-        <div className="bg-slate-900 text-white rounded-2xl p-6 flex items-center justify-between">
+        <div className="bg-[#090D16] bg-architectural-grid-dark text-white rounded-2xl p-6 flex items-center justify-between border border-slate-800">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-brand-400">
-              Total Recorded Payments
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-brand-400">
+              // RECORDED REVENUE
             </span>
-            <p className="text-3xl font-extrabold mt-1">
+            <p className="text-3xl font-extrabold font-mono mt-1">
               {formatCurrency(stats.totalRecordedPayments)}
             </p>
             <p className="text-xs text-slate-400 mt-1">
-              Across {stats.paymentRecordCount || 0} recorded transactions
+              {stats.paymentRecordCount || 0} verified installments
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-brand-600/30 border border-brand-500/40 flex items-center justify-center text-brand-300">
+          <div className="w-12 h-12 rounded-2xl bg-brand-600/20 border border-brand-500/40 flex items-center justify-center text-brand-400">
             <CreditCard className="w-6 h-6" />
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 flex items-center justify-between shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 flex items-center justify-between shadow-sm">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Contracted Project Volume
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              // CONTRACTED VOLUME
             </span>
-            <p className="text-2xl font-extrabold text-slate-900 mt-1">
+            <p className="text-2xl font-extrabold font-mono text-slate-950 mt-1">
               {formatCurrency(stats.totalContractedValue)}
             </p>
-            <p className="text-xs text-amber-600 font-medium mt-1">
-              Receivables Due: {formatCurrency(stats.totalReceivables)}
+            <p className="font-mono text-xs text-amber-600 font-semibold mt-1">
+              DUE: {formatCurrency(stats.totalReceivables)}
             </p>
           </div>
           <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
@@ -192,16 +194,16 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 flex items-center justify-between shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 flex items-center justify-between shadow-sm">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Completed Deliveries
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              // COMPLETED BUILDS
             </span>
-            <p className="text-2xl font-extrabold text-emerald-600 mt-1">
+            <p className="text-2xl font-extrabold font-mono text-emerald-600 mt-1">
               {stats.completedProjects} Projects
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              {stats.totalServices} Active Catalogue Services
+              {stats.totalServices} Active Catalogue Capabilities
             </p>
           </div>
           <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -212,13 +214,13 @@ const AdminDashboard = () => {
 
       {/* Recharts Visual Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <h3 className="text-base font-bold text-slate-900 mb-1">
-            Service Request Demand by Category
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-brand-600 block mb-1">
+            // DEMAND TELEMETRY
+          </span>
+          <h3 className="text-base font-bold font-display text-slate-950 mb-4">
+            Service Request Volume by Capability
           </h3>
-          <p className="text-xs text-slate-500 mb-4">
-            Distribution of client requests across Dynamic IT services
-          </p>
           <div className="h-64 w-full">
             {data?.charts?.serviceDemandChart?.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -227,7 +229,7 @@ const AdminDashboard = () => {
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                   <Tooltip />
-                  <Bar dataKey="requests" fill="#4f46e5" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="requests" fill="#2563eb" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -238,9 +240,13 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <h3 className="text-base font-bold text-slate-900 mb-1">Project Status Breakdown</h3>
-          <p className="text-xs text-slate-500 mb-4">Current lifecycle distribution of projects</p>
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-brand-600 block mb-1">
+            // EXECUTION TELEMETRY
+          </span>
+          <h3 className="text-base font-bold font-display text-slate-950 mb-4">
+            Project Status Distribution
+          </h3>
           <div className="h-64 w-full">
             {stats.totalProjects > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -271,18 +277,19 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Recent Requests & Active Projects Tables */}
+      {/* Recent Requests & Active Projects */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Service Requests */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold text-slate-900">Recent Service Requests</h3>
+            <h3 className="text-base font-bold font-display text-slate-950">
+              Recent Client Service Briefs
+            </h3>
             <Link
               to="/admin/requests"
-              className="text-xs font-semibold text-brand-600 hover:text-brand-700 inline-flex items-center gap-1"
+              className="font-mono text-xs font-semibold text-brand-600 hover:text-brand-700 inline-flex items-center gap-1"
             >
               <span>Manage All</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
@@ -293,10 +300,11 @@ const AdminDashboard = () => {
                 className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
               >
                 <div>
-                  <p className="text-sm font-bold text-slate-900">{req.projectTitle}</p>
-                  <p className="text-xs text-slate-500">
-                    {req.customer?.name} • {req.service?.title} • Budget:{' '}
-                    {formatCurrency(req.budget)}
+                  <p className="text-sm font-bold font-display text-slate-950">
+                    {req.projectTitle}
+                  </p>
+                  <p className="font-mono text-xs text-slate-500">
+                    {req.customer?.name} • {req.service?.title} • {formatCurrency(req.budget)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -304,9 +312,9 @@ const AdminDashboard = () => {
                   {['pending', 'under_review'].includes(req.status) && (
                     <Link
                       to={`/admin/quotations?requestId=${req._id}`}
-                      className="px-2.5 py-1 rounded-lg bg-brand-600 text-white text-xs font-semibold"
+                      className="px-2.5 py-1 rounded-lg bg-[#090D16] text-white font-mono text-[11px] font-semibold"
                     >
-                      Quote
+                      QUOTE
                     </Link>
                   )}
                 </div>
@@ -315,16 +323,17 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Active Projects */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-bold text-slate-900">Recent Projects & Progress</h3>
+            <h3 className="text-base font-bold font-display text-slate-950">
+              Active Builds & Progress
+            </h3>
             <Link
               to="/admin/projects"
-              className="text-xs font-semibold text-brand-600 hover:text-brand-700 inline-flex items-center gap-1"
+              className="font-mono text-xs font-semibold text-brand-600 hover:text-brand-700 inline-flex items-center gap-1"
             >
-              <span>Manage Projects</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Operations</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
@@ -332,14 +341,15 @@ const AdminDashboard = () => {
             {(data?.recentProjects || []).map((proj) => (
               <div
                 key={proj._id}
-                className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5"
+                className="p-4 rounded-xl bg-[#F8FAFC] border border-slate-200/90 space-y-2.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <p className="text-sm font-bold text-slate-900">{proj.projectTitle}</p>
-                    <p className="text-xs text-slate-500">
-                      Client: {proj.customer?.name} • Delivery:{' '}
-                      {formatDate(proj.expectedDeliveryDate)}
+                    <p className="text-sm font-bold font-display text-slate-950">
+                      {proj.projectTitle}
+                    </p>
+                    <p className="font-mono text-[11px] text-slate-500">
+                      CLIENT: {proj.customer?.name} • DUE: {formatDate(proj.expectedDeliveryDate)}
                     </p>
                   </div>
                   <StatusBadge status={proj.status} />

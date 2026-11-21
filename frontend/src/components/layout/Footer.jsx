@@ -1,38 +1,48 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Layers, Mail, Phone, MapPin, ShieldCheck, ArrowUpRight } from 'lucide-react';
+import { Mail, Phone, MapPin, ArrowUpRight, ShieldCheck } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Column 1: Brand */}
-          <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-brand-600 text-white flex items-center justify-center">
-                <Layers className="w-5 h-5" />
+    <footer className="bg-[#101828] text-slate-300 border-t border-slate-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main 4-Column Agency Grid */}
+        <div className="py-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
+          {/* Column 1: Agency Identity */}
+          <div className="lg:col-span-4 space-y-4">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center">
+                <img
+                  src="/logo.png"
+                  alt="Dynamic IT Logo"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <span className="text-lg font-extrabold text-white tracking-tight">
-                Dynamic <span className="text-brand-400">IT</span>
-              </span>
+              <div>
+                <span className="text-lg font-extrabold font-display text-white tracking-tight block leading-none">
+                  Dynamic <span className="text-[#60A5FA]">IT</span>
+                </span>
+                <span className="text-xs text-slate-400">
+                  Digital Agency & Project Platform
+                </span>
+              </div>
             </Link>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              From website development to digital marketing, Dynamic IT helps businesses build,
-              manage, and scale their online presence with transparent project tracking.
+            <p className="text-sm text-slate-400 leading-relaxed max-w-sm">
+              We design and build custom web applications, landing pages, brand identities, and
+              digital marketing campaigns—managed end-to-end through our client portal.
             </p>
-            <div className="inline-flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1.5 rounded-full">
+            <div className="inline-flex items-center gap-2 text-xs text-emerald-400 bg-emerald-950/50 border border-emerald-800/50 px-3 py-1.5 rounded-lg">
               <ShieldCheck className="w-4 h-4" />
-              <span>Verified Agency Workflow & Client Portal</span>
+              <span>Transparent Quotations & Milestone Tracking</span>
             </div>
           </div>
 
-          {/* Column 2: Core Services */}
-          <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Core Services
+          {/* Column 2: Digital Services */}
+          <div className="lg:col-span-3">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-4">
+              Digital Services
             </h3>
-            <ul className="space-y-2.5 text-sm">
+            <ul className="space-y-2.5 text-sm text-slate-400">
               <li>
                 <Link
                   to="/services/website-development"
@@ -81,69 +91,70 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 3: Quick Links */}
-          <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Platform & Company
+          {/* Column 3: Company & Portal */}
+          <div className="lg:col-span-2">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-4">
+              Company
             </h3>
-            <ul className="space-y-2.5 text-sm">
+            <ul className="space-y-2.5 text-sm text-slate-400">
               <li>
                 <Link to="/about" className="hover:text-white transition-colors">
-                  About Dynamic IT
+                  About Us
                 </Link>
               </li>
               <li>
                 <Link to="/pricing" className="hover:text-white transition-colors">
-                  Service Packages & Pricing
+                  Pricing & Packages
                 </Link>
               </li>
               <li>
                 <Link to="/portfolio" className="hover:text-white transition-colors">
-                  Featured Portfolio
+                  Sample Portfolio
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="hover:text-white transition-colors">
-                  Contact & Consultation
+                  Contact Us
                 </Link>
               </li>
               <li>
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-1 text-brand-400 hover:text-brand-300 font-medium"
+                  className="inline-flex items-center gap-1 text-[#60A5FA] hover:text-blue-300 font-medium"
                 >
-                  <span>Client & Admin Login</span>
+                  <span>Client Portal</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 4: Contact Info */}
-          <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Agency Headquarters
+          {/* Column 4: Office & Contact */}
+          <div className="lg:col-span-3">
+            <h3 className="text-xs font-semibold text-white uppercase tracking-wider mb-4">
+              Dhaka Office
             </h3>
             <ul className="space-y-3 text-sm text-slate-400">
               <li className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-brand-400 shrink-0 mt-1" />
+                <MapPin className="w-4 h-4 text-[#60A5FA] shrink-0 mt-1" />
                 <span>Level 7, Dynamic Tower, Banani C/A, Dhaka-1213, Bangladesh</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-brand-400 shrink-0" />
+                <Phone className="w-4 h-4 text-[#60A5FA] shrink-0" />
                 <span>+880 1711-000111</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-brand-400 shrink-0" />
+                <Mail className="w-4 h-4 text-[#60A5FA] shrink-0" />
                 <span>support@dynamicit.com</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        {/* Bottom Copyright Bar */}
+        <div className="py-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
           <p>© {new Date().getFullYear()} Dynamic IT. All rights reserved.</p>
-          <p>Full-Stack Digital Agency Service Management & Project Tracking Platform</p>
+          <p>Digital Agency Service Management & Project Tracking Platform</p>
         </div>
       </div>
     </footer>

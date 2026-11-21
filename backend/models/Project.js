@@ -29,6 +29,39 @@ const milestoneSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const projectHistorySchema = new mongoose.Schema(
+  {
+    action: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    status: {
+      type: String,
+      default: '',
+    },
+    progress: {
+      type: Number,
+      default: null,
+    },
+    note: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
+
 const projectSchema = new mongoose.Schema(
   {
     quotation: {
@@ -86,6 +119,10 @@ const projectSchema = new mongoose.Schema(
     },
     milestones: {
       type: [milestoneSchema],
+      default: [],
+    },
+    history: {
+      type: [projectHistorySchema],
       default: [],
     },
   },

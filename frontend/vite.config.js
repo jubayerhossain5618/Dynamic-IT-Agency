@@ -14,6 +14,22 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        ws: true,
+      },
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom', 'axios'],
+          'vendor-charts': ['recharts'],
+          'vendor-icons': ['lucide-react'],
+        },
+      },
     },
   },
 });

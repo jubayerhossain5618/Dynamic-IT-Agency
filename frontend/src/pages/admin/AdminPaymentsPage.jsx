@@ -108,14 +108,16 @@ const AdminPaymentsPage = () => {
       subtitle="Record client installments, track remaining project balances, and manage payment statuses"
       actions={
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={fillPartialPaymentDemo}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Demo 50% Partial Payment</span>
-          </button>
+          {import.meta.env.VITE_DEMO_MODE === 'true' && (
+            <button
+              type="button"
+              onClick={fillPartialPaymentDemo}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Demo 50% Partial Payment</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}

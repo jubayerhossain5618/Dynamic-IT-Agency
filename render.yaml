@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: dynamic-it-platform
+    env: node
+    plan: starter
+    buildCommand: npm --prefix backend install && npm --prefix frontend install && npm --prefix frontend run build
+    startCommand: npm --prefix backend start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_FRONTEND
+        value: true
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: SEED_DEMO_DATA
+        value: false
+      - key: AUTO_START_LOCAL_MONGOD
+        value: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        value: admin@dynamicit.com
+      - key: ADMIN_INITIAL_PASSWORD
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
