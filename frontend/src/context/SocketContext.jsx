@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
-import api from '../services/api';
+import api, { getStoredAuthToken } from '../services/api';
 import { useAuth } from './AuthContext';
 
 const SocketContext = createContext(null);
@@ -47,7 +47,7 @@ export const SocketProvider = ({ children }) => {
       ? rawApiUrl.replace(/\/api\/?$/, '')
       : undefined;
 
-    const token = sessionStorage.getItem('dyit_token');
+    const token = getStoredAuthToken();
 
     const newSocket = io(socketBaseUrl, {
       withCredentials: true,
